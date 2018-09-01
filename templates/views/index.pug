@@ -1,0 +1,246 @@
+extends ../layouts/default
+
+block content
+	center
+			img(src='/images/SentiFine-Logo1.png', width='250') 
+			br
+			br
+	div(style="padding-left: 2vw; padding-right: 2vw;").jumbotron
+
+		center
+			.lead You're welcome. We are happy you're here.
+
+		.lead This website contains the daily Thai financial news and the summary of the news sentiments. The objective of this site is to demonstrate the usability of our SentiFine framework. 
+
+
+	.row
+		.col-sm-12
+			h5 News Sentiment in the last 5 days
+				center
+					svg#svg(weight='900', height='500', viewbox='0 0 900 500', preserveaspectratio='xMidYMid meet')
+
+			hr
+
+
+	//.row
+		.col-sm-6
+			h5: a(href='/') Are you a Junior/Senior at BOT (IT) ?
+			p Group 1
+			a(href='https://goo.gl/forms/MAuwGchhPaAhPWkm2', target='_blank', title='1. Accuracy Test').btn.btn-md.btn-success Accuracy Test 1
+			a(href='https://goo.gl/forms/Hh1cbfabNCJCBR2P2', target='_blank', title='2. Usability Test').btn.btn-md.btn-default Usability Test 1
+			hr
+			h5: a(href='/') Are you a Junior/Senior at BOT (Non-IT) ?
+			p Group 2
+			a(href='https://goo.gl/forms/sxXxC3oITOQPllKX2', target='_blank', title='1. Accuracy Test').btn.btn-md.btn-success Accuracy Test 2
+			a(href='https://goo.gl/forms/Hh1cbfabNCJCBR2P2', target='_blank', title='2. Usability Test').btn.btn-md.btn-default Usability Test 2
+			hr
+
+
+		.col-sm-6
+			h5: a(href='/') Are you a Team executive at BOT (IT) ?
+			p Group 3
+			a(href='https://goo.gl/forms/lzbVZmCKGwkkaWVG2', target='_blank', title='1. Accuracy Test').btn.btn-md.btn-success Accuracy Test 3
+			a(href='https://goo.gl/forms/Hh1cbfabNCJCBR2P2', target='_blank', title='2. Usability Test').btn.btn-md.btn-default Usability Test 3
+			hr
+			h5: a(href='/') Are you a Team executive at BOT (Non-IT) ?
+			p Group 4
+			a(href='https://goo.gl/forms/JvUAh4AKZwtTjGtC2', target='_blank', title='1. Accuracy Test').btn.btn-md.btn-success Accuracy Test 4
+			a(href='https://goo.gl/forms/Hh1cbfabNCJCBR2P2', target='_blank', title='2. Usability Test').btn.btn-md.btn-default Usability Test 4
+			hr
+			//- h3 Generating CSVs
+			//- p For an example of how to download a list in .csv format, see /routes/download/users.js.
+			//- p It uses the excellent node-csv library.
+			//- a(href='/download/users').btn.btn-default Download users.csv
+
+	//center
+		img(src='/images/new-positive.png', width='40')
+
+		//-.col-sm-4
+			.panel.panel-default
+				.panel-heading
+					h3.panel-title: a(href='/keystone/signin') Admin UI
+				.panel-body
+					p Keystone includes session management and default sign-in and sign-out views.
+					p Sign in with the username <code>demo@keystonejs.com</code> and the password <code>demo</code>
+					if user
+						a(href='/keystone').btn.btn-default Open Admin UI
+						a(href='/keystone/signout').btn.btn-link Sign out
+					else
+						a(href='/keystone/signin').btn.btn-default Sign in
+				
+			.panel.panel-default
+				.panel-heading
+					h3.panel-title: a(href='/404') Error Handling
+				.panel-body
+					p The 404 and 500 views demonstrate how to set up error handlers for your application.
+					a(href='/hey-this-isnt-a-valid-url').btn.btn-default Test it
+
+
+	script(src='http://d3js.org/d3.v4.min.js', charset='utf-8')
+
+	script.
+		var data = 
+		[{"name":"Negative","values":[{"date":"2018-06-20","price":19},{"date":"2018-06-19","price":29},{"date":"2018-06-18","price":17},{"date":"2018-06-17","price":3},{"date":"2018-06-16","price":5}]},{"name":"Neutral","values":[{"date":"2018-06-20","price":24},{"date":"2018-06-19","price":25},{"date":"2018-06-18","price":17},{"date":"2018-06-17","price":1},{"date":"2018-06-16","price":3}]},{"name":"Positive","values":[{"date":"2018-06-20","price":47},{"date":"2018-06-19","price":44},{"date":"2018-06-18","price":27},{"date":"2018-06-17","price":8},{"date":"2018-06-16","price":5}]}];
+
+		var width = 800;
+		var height = 400;
+		var margin = 50;
+		var duration = 200;
+
+		var lineOpacity = "0.5";
+		var lineOpacityHover = "0.85";
+		var otherLinesOpacityHover = "0.1";
+		var lineStroke = "1.5px";
+		var lineStrokeHover = "2.5px";
+
+		var circleOpacity = '0.85';
+		var circleOpacityOnLineHover = "0.25"
+		var circleRadius = 4;
+		var circleRadiusHover = 7;
+
+
+		/* Format Data */
+		var parseDate = d3.timeParse("%Y-%m-%d");
+		data.forEach(function(d) { 
+		d.values.forEach(function(d) {
+			d.date = parseDate(d.date);
+			d.price = +d.price;    
+		});
+		});
+		//console.log(parseDate);
+
+		/* Scale */
+		var xScale = d3.scaleTime()
+		.domain(d3.extent(data[0].values, d => d.date))
+		.range([0, width-margin]);
+
+		var yScale = d3.scaleLinear()
+		//.domain([0, d3.max(data[0].values, d => d.price)])
+		.domain([0, 60])
+		.range([height-margin, 0]);
+
+		//var color = d3.scaleOrdinal(d3.schemeCategory10);
+		//var colors =  d3.scaleOrdinal(["#e51c23", "#ff9800", "#4caf50"]);
+		var color = d3.scaleOrdinal() // D3 Version 4
+			.domain(["Negative", "Neutral", "Positive"])
+			.range(["#e51c23", "#ff9800", "#4caf50"]);
+
+		/* Add SVG */
+		var svg = d3.select("#svg").append("svg")
+		.attr("width", (width+margin)+"px")
+		.attr("height", (height+margin)+"px")
+		.append('g')
+		.attr("transform", `translate(${margin}, ${margin})`);
+
+
+		/* Add line into SVG */
+		var line = d3.line()
+		.x(d => xScale(d.date))
+		.y(d => yScale(d.price));
+
+		let lines = svg.append('g')
+		.attr('class', 'lines');
+
+		lines.selectAll('.line-group')
+		.data(data).enter()
+		.append('g')
+		.attr('class', 'line-group')  
+		.on("mouseover", function(d, i) {
+			svg.append("text")
+				.attr("class", "title-text")
+				.style("fill", color(i))        
+				.text(d.name)
+				.attr("text-anchor", "middle")
+				.attr("x", (width-margin)/2)
+				.attr("y", 5);
+			})
+		.on("mouseout", function(d) {
+			svg.select(".title-text").remove();
+			})
+		.append('path')
+		.attr('class', 'line')  
+		.attr('d', d => line(d.values))
+		.style('stroke', (d, i) => color(i))
+		.style('opacity', lineOpacity)
+		.on("mouseover", function(d) {
+			d3.selectAll('.line')
+							.style('opacity', otherLinesOpacityHover);
+			d3.selectAll('.circle')
+							.style('opacity', circleOpacityOnLineHover);
+			d3.select(this)
+				.style('opacity', lineOpacityHover)
+				.style("stroke-width", lineStrokeHover)
+				.style("cursor", "pointer");
+			})
+		.on("mouseout", function(d) {
+			d3.selectAll(".line")
+							.style('opacity', lineOpacity);
+			d3.selectAll('.circle')
+							.style('opacity', circleOpacity);
+			d3.select(this)
+				.style("stroke-width", lineStroke)
+				.style("cursor", "none");
+			});
+
+
+		/* Add circles in the line */
+		lines.selectAll("circle-group")
+		.data(data).enter()
+		.append("g")
+		.style("fill", (d, i) => color(i))
+		.selectAll("circle")
+		.data(d => d.values).enter()
+		.append("g")
+		.attr("class", "circle")  
+		.on("mouseover", function(d) {
+			d3.select(this)     
+				.style("cursor", "pointer")
+				.append("text")
+				.attr("class", "text")
+				.text(`${d.price}`)
+				.attr("x", d => xScale(d.date) + 5)
+				.attr("y", d => yScale(d.price) - 10);
+			})
+		.on("mouseout", function(d) {
+			d3.select(this)
+				.style("cursor", "none")  
+				.transition()
+				.duration(duration)
+				.selectAll(".text").remove();
+			})
+		.append("circle")
+		.attr("cx", d => xScale(d.date))
+		.attr("cy", d => yScale(d.price))
+		.attr("r", circleRadius)
+		.style('opacity', circleOpacity)
+		.on("mouseover", function(d) {
+				d3.select(this)
+				.transition()
+				.duration(duration)
+				.attr("r", circleRadiusHover);
+			})
+			.on("mouseout", function(d) {
+				d3.select(this) 
+				.transition()
+				.duration(duration)
+				.attr("r", circleRadius);  
+			});
+
+
+		/* Add Axis into SVG */
+		var xAxis = d3.axisBottom(xScale).ticks(5);
+		var yAxis = d3.axisLeft(yScale).ticks(5);
+
+		svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", `translate(0, ${height-margin})`)
+		.call(xAxis);
+
+		svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+		.append('text')
+		.attr("y", 15)
+		.attr("transform", "rotate(-90)")
+		.attr("fill", "#000")
+		.text("Total News");

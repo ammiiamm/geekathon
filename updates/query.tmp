@@ -1,0 +1,163 @@
+##################
+### Overall
+##################
+
+=====
+=sentiment by date
+=====
+db.finnews.aggregate([
+            {
+                $group : 
+                {  
+                    _id: { date: { $dateToString: { format: "%Y-%m-%d", date: "$published" } }, sentiment : "$sentiment" },
+                    count: { $sum: 1 }
+                }
+            }
+])
+
+  script.    
+    d3.json("http://sentifine.me:3001/api/finnewbydate", function(data) {
+      console.log(data[0]['_id']['sentiment']);
+      console.log(data[0]['_id']['date']);
+      console.log(data[0]['count']);
+    });
+
+=====
+=sentiment by category
+=====
+db.finnews.aggregate([
+            {
+                $group : 
+                {  
+                    _id: { category: "$category", sentiment : "$sentiment" },
+                    count: { $sum: 1 }
+                }
+            }
+])
+
+  script.    
+    d3.json("http://sentifine.me:3001/api/finnewbycat", function(data) {
+      console.log(data[0]['_id']['sentiment']);
+      console.log(data[0]['_id']['category']);
+      console.log(data[0]['count']);
+    });
+
+=====
+=sentiment by source
+=====
+db.finnews.aggregate([
+            {
+                $group : 
+                {  
+                    _id: { source: "$source", sentiment : "$sentiment" },
+                    count: { $sum: 1 }
+                }
+            }
+])
+
+  script.    
+    d3.json("http://sentifine.me:3001/api/finnewbysource", function(data) {
+      console.log(data[0]['_id']['sentiment']);
+      console.log(data[0]['_id']['source']);
+      console.log(data[0]['count']);
+    });
+
+=====
+=sentiment 
+=====
+db.finnews.aggregate([
+            {
+                $group : 
+                {  
+                    _id: { sentiment : "$sentiment" },
+                    count: { $sum: 1 }
+                }
+            }
+])
+
+  script.    
+    d3.json("http://sentifine.me:3001/api/finnewbysent", function(data) {
+      console.log(data[0]['_id']['sentiment']);
+      console.log(data[0]['count']);
+    });
+
+##################
+### Daily
+##################
+
+=====
+=sentiment by date
+=====
+db.finnews.aggregate([
+            {
+                $match :
+                {
+                    published: { $gte: currentDateTime, $lt: tmrDateTime }
+                }
+            },
+            {
+                $group : 
+                {  
+                    _id: { date: { $dateToString: { format: "%Y-%m-%d", date: "$published" } }, sentiment : "$sentiment" },
+                    count: { $sum: 1 }
+                }
+            }
+])
+
+=====
+=sentiment by category
+=====
+db.finnews.aggregate([
+            {
+                $match :
+                {
+                    published: { $gte: currentDateTime, $lt: tmrDateTime }
+                }
+            },
+            {
+                $group : 
+                {  
+                    _id: { category: "$category", sentiment : "$sentiment" },
+                    count: { $sum: 1 }
+                }
+            }
+])
+
+
+=====
+=sentiment by source
+=====
+db.finnews.aggregate([
+            {
+                $match :
+                {
+                    published: { $gte: currentDateTime, $lt: tmrDateTime }
+                }
+            },
+            {
+                $group : 
+                {  
+                    _id: { source: "$source", sentiment : "$sentiment" },
+                    count: { $sum: 1 }
+                }
+            }
+])
+
+=====
+=sentiment 
+=====
+db.finnews.aggregate([
+            {
+                $match :
+                {
+                    published: { $gte: currentDateTime, $lt: tmrDateTime }
+                }
+            },
+            {
+                $group : 
+                {  
+                    _id: { sentiment : "$sentiment" },
+                    count: { $sum: 1 }
+                }
+            }
+])

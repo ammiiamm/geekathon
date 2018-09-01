@@ -1,0 +1,192 @@
+extends ../layouts/default
+
+block intro
+  .container
+    - var startDate = new Date().toISOString().slice(0, 10)
+    - var endDateTime = new Date()
+    - endDateTime.setDate(endDateTime.getDate() + 1)
+    - var endDate = endDateTime.toISOString().slice(0, 10)
+
+    - var calPositive = ((countPositive / countAll)*100).toFixed(2)
+    - var calNeutral = ((countNeutral / countAll)*100).toFixed(2)
+    - var calNegative = ((countNegative / countAll)*100).toFixed(2)
+
+
+    h2 Overall Dashboard
+    p Thai News published starting from 2018-05-05 until #{startDate}.
+block content
+  .container
+    .row
+      .col-sm-3
+        .panel.panel-primary
+          .panel-heading Total News
+          .panel-body
+            h2 #{countAll}
+      .col-sm-3
+        .panel.panel-success
+          .panel-heading %Positive
+          .panel-body
+            h2 #{calPositive}%
+      .col-sm-3
+        .panel.panel-warning
+          .panel-heading %Neutral
+          .panel-body
+            h2 #{calNeutral}%
+      .col-sm-3
+        .panel.panel-danger
+          .panel-heading %Negative
+          .panel-body
+            h2 #{calNegative}%
+      br
+
+    .row
+      .col-sm-6
+        .panel.panel-default
+          .panel-heading The summary of all news by categories
+          .panel-body 
+            center
+              svg#svg1(width='400', height='400', viewbox='0 0 400 400', preserveaspectratio='xMidYMid meet')
+      .col-sm-6
+        .panel.panel-default
+          .panel-heading The summary of all news by source
+          .panel-body
+            center
+              svg#svg(width='450', height='400', viewbox='0 0 450 400', preserveaspectratio='xMidYMid meet')  
+      br
+  //-    
+    .panel-group
+      .panel.panel-info
+        .panel-heading Trend of News by sentiments
+        .panel-body
+          center
+            svg#svg2(width='960', height='500', viewbox='0 0 960 500', preserveaspectratio='xMidYMid meet')
+
+  script(src='http://d3js.org/d3.v4.min.js', charset='utf-8')
+
+  script.
+
+    d3.json("http://sentifine.me:3001/api/finnewbysourceall", function(data) {
+
+      var series = d3.stack()
+          .keys(["Negative", "Neutral", "Positive"])
+          .offset(d3.stackOffsetDiverging)
+          (data);
+
+      var svg = d3.select("#svg"),
+          margin = {top: 20, right: 30, bottom: 30, left: 60},
+          width = +svg.attr("width"),
+          height = +svg.attr("height");
+
+      var x = d3.scaleBand()
+          .domain(data.map(function(d) { return d.source; }))
+          .rangeRound([margin.left, width - margin.right])
+          .padding(0.1);
+
+      var y = d3.scaleLinear()
+          .domain([d3.min(series, stackMin), d3.max(series, stackMax)])
+          .rangeRound([height - margin.bottom, margin.top]);
+
+      var z = d3.scaleOrdinal(d3.schemeCategory10);
+
+      var colors = ["#e51c23", "#ff9800", "#4caf50"]
+     
+      svg.append("g")
+        .selectAll("g")
+        .data(series)
+        .enter().append("g")
+          .attr("fill", function(d) { return z(d.key); })
+          .style("fill", function(d,i) { return colors[i];})
+        .selectAll("rect")
+        .data(function(d) { return d; })
+        .enter().append("rect")
+          .attr("width", x.bandwidth)
+          .attr("x", function(d) { return x(d.data.source); })
+          .attr("y", function(d) { return y(d[1]); })
+          .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+      console.log(svg)
+      svg.append("g")
+          .attr("transform", "translate(0," + y(0) + ")")
+          .call(d3.axisBottom(x));
+
+      svg.append("g")
+          .attr("transform", "translate(" + margin.left + ",0)")
+          .call(d3.axisLeft(y));
+          
+
+      function stackMin(serie) {
+        return d3.min(serie, function(d) { return d[0]; });
+      }
+
+      function stackMax(serie) {
+        return d3.max(serie, function(d) { return d[1]; });
+      }
+    });
+  
+  
+  script.
+
+    d3.json("http://sentifine.me:3001/api/finnewbycatall", function(data) {
+
+      var series = d3.stack()
+          .keys(["Negative", "Neutral", "Positive"])
+          .offset(d3.stackOffsetDiverging)
+          (data);
+
+      var svg = d3.select("#svg1"),
+          margin = {top: 20, right: 30, bottom: 30, left: 60},
+          width = +svg.attr("width"),
+          height = +svg.attr("height");
+
+      var x = d3.scaleBand()
+          .domain(data.map(function(d) { return d.category; }))
+          .rangeRound([margin.left, width - margin.right])
+          .padding(0.1);
+
+      var y = d3.scaleLinear()
+          .domain([d3.min(series, stackMin), d3.max(series, stackMax)])
+          .rangeRound([height - margin.bottom, margin.top]);
+
+      var z = d3.scaleOrdinal(d3.schemeCategory10);
+
+      var colors = ["#e51c23", "#ff9800", "#4caf50"]
+   
+      svg.append("g")
+        .selectAll("g")
+        .data(series)
+        .enter().append("g")
+          .attr("fill", function(d) { return z(d.key); })
+          .style("fill", function(d,i) { return colors[i];})
+        .selectAll("rect")
+        .data(function(d) { return d; })
+        .enter().append("rect")
+          .attr("width", x.bandwidth)
+          .attr("x", function(d) { return x(d.data.category); })
+          .attr("y", function(d) { return y(d[1]); })
+          .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+      console.log(svg)
+      svg.append("g")
+          .attr("transform", "translate(0," + y(0) + ")")
+          .call(d3.axisBottom(x));
+
+      svg.append("g")
+          .attr("transform", "translate(" + margin.left + ",0)")
+          .call(d3.axisLeft(y));
+          
+
+      function stackMin(serie) {
+        return d3.min(serie, function(d) { return d[0]; });
+      }
+
+      function stackMax(serie) {
+        return d3.max(serie, function(d) { return d[1]; });
+      }
+    });
+  
+  script.
+
+    d3.json("http://sentifine.me:3001/api/finnewbydate", function(data) {
+
+        console.log(data)
+    });
+
+

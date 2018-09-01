@@ -1,0 +1,109 @@
+extends ../layouts/default
+
+
+block intro
+                center
+                  img(src='/images/SentiFine-Logo1.png', width='250')
+                  br
+                  br
+                  a(class='btn btn-default btn-sm' href='/finnew/') View All
+                  a(class='btn btn-default btn-sm' href='/finnew/' + 'BOT') BOT in News 
+                  a(class='btn btn-default btn-sm' href='/exporttocsv') Export to CSV 
+                .container-fluid
+                br
+block content
+              left
+                #accordion.panel-group
+                  #panel1.panel.panel-default
+                    .panel-heading
+                      h4.panel-title
+                        a(data-toggle='collapse', data-target='#collapseSense', href='#collapseSense')
+                          | Filter by Sentiment
+                    #collapseSense.panel-collapse.collapse.in
+                      .panel-body
+                          form(method='post')
+                            input(type='hidden', name='action')                                 
+                            .form-actions
+                              .btn-group.btn-group-justified(role='group_sentiment', aria-label='...')
+                                .btn-group(role='group_sentiment')
+                                  a(class='btn btn-danger btn-sm' href='/finnew/' + 'Negative') Negative
+                                .btn-group(role='group_sentiment')
+                                  a(class='btn btn-warning btn-sm' href='/finnew/' + 'Neutral') Neutral
+                                .btn-group(role='group_sentiment')
+                                  a(class='btn btn-success btn-sm' href='/finnew/' + 'Positive') Positive
+
+                  #panel2.panel.panel-default
+                    .panel-heading
+                      h4.panel-title
+                        a.collapsed(data-toggle='collapse', data-target='#collapseCat', href='#collapseCat')
+                          | Filter by Category
+                    #collapseCat.panel-collapse.collapse
+                      .panel-body
+                          form(method='post')
+                            input(type='hidden', name='action')                                 
+                            .form-actions
+                              .btn-group.btn-group-justified(role='group_category', aria-label='...')
+                                .btn-group(role='group_category')
+                                  a(class='btn btn-default btn-sm' href='/finnew/' + 'Finance') Finance
+                                .btn-group(role='group_category')
+                                  a(class='btn btn-default btn-sm' href='/finnew/' + 'Economy') Economy
+                                .btn-group(role='group_category')
+                                  a(class='btn btn-default btn-sm' href='/finnew/' + 'Business') Business
+                                .btn-group(role='group_category')
+                                  a(class='btn btn-default btn-sm' href='/finnew/' + 'Property') Property                                                             
+                            
+              .row 
+                p Total News(s) Per Page : #{finnews.results.length}
+                if finnews.results.length     
+                  for dat in finnews.results
+                    .list-group
+                      - var d = new Date(dat.published)
+                      - var sense = dat.sentiment
+                      - var source = dat.source
+                      .list-group-item.borderless
+                          case sense
+                            when 'Positive'
+                              h5.list-group-item-heading(href=dat.url_link, target='_blank')
+                                span.label.label-success Positive
+                                a(href=dat.url_link, target='_blank')   !{dat.title}
+                            when 'Negative'
+                              h5.list-group-item-heading(href=dat.url_link, target='_blank')                          
+                                span.label.label-danger Negative
+                                a(href=dat.url_link, target='_blank')   !{dat.title}
+                            when 'Neutral'
+                              h5.list-group-item-heading(href=dat.url_link, target='_blank')                          
+                                span.label.label-warning Neutral
+                                a(href=dat.url_link, target='_blank')   !{dat.title}
+                          p.list-group-item-text  
+                          case source
+                            when 'ThaiPR'
+                              img(src='/images/news_icon/thaipr.png', alt='ThaiPR' , width='30') 
+                            when 'PostToday'
+                              img(src='/images/news_icon/posttoday.png', width='30') 
+                            when 'BangkokBizNews'
+                              img(src='/images/news_icon/bangkokbiz.png', width='30') 
+                            when 'ThaiPBS'
+                              img(src='/images/news_icon/thaipbs.png', width='30')
+                            when 'Manager'
+                              img(src='/images/news_icon/manager.png', width='30')
+                            default
+                              img(src='/images/news_icon/bangkokbiz.png', width='30')                        
+                          |   |  #{d}                         
+                          |   |  #{dat.category}                     
+                          h6 !{dat.summary}
+              center  
+                if finnews.totalPages > 1
+                  ul.pagination
+                    if finnews.previous
+                      li: a(href='?page=' + finnews.previous): span.glyphicon.glyphicon-chevron-left
+                    else
+                      li.disabled: a(href='?page=' + 1): span.glyphicon.glyphicon-chevron-left
+                    each p, i in finnews.pages
+                      li(class=finnews.currentPage === p ? 'active' : null)
+                        a(href='?page=' + (p === '...' ? (i ? finnews.totalPages : 1) : p ))= p
+                    if finnews.next
+                      li: a(href='?page=' + finnews.next): span.glyphicon.glyphicon-chevron-right
+                    else
+                      li.disabled: a(href='?page=' + finnews.totalPages): span.glyphicon.glyphicon-chevron-right
+
+                    
